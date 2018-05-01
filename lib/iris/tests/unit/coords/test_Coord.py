@@ -277,19 +277,28 @@ class Test_collapsed(tests.IrisTest):
                                   [[coord.bounds.min(), coord.bounds.max()]])
 
     def test_numeric_nd(self):
-        # Contiguous only defined for 2d bounds.
-        coord = AuxCoord(points=np.array([3, 6, 9]),
-                         bounds=np.array([[1, 2, 4, 5],
+        coord = AuxCoord(points=np.array([[1, 2, 4, 5],
                                           [4, 5, 7, 8],
                                           [7, 8, 10, 11]]))
-        with self.assertRaises(ValueError):
-            coord.collapsed()
 
-    def test_collapsed_overflow(self):
-        coord = DimCoord(points=np.array([1493892000, 1493895600, 1493899200],
-                                         dtype=np.int32))
-        result = coord.collapsed()
-        self.assertEqual(result.points, 1493895600)
+        collapsed_coord = coord.collapsed()
+        self.assertArrayEqual(collapsed_coord.points, np.array([6]))
+        self.assertArrayEqual(collapsed_coord.bounds, np.array([[1, 11]]))
+
+        # Test partially collapsing one dimension...
+        collapsed_coord = coord.collapsed(1)
+        self.assertArrayEqual(collapsed_coord.points, np.array([3.,  6.,  9.]))
+        self.assertArrayEqual(collapsed_coord.bounds, np.array([[1,  5],
+                                                                [4,  8],
+                                                                [7, 11]]))
+
+        # ... and the other
+        collapsed_coord = coord.collapsed(0)
+        self.assertArrayEqual(collapsed_coord.points, np.array([4,  5,  7, 8]))
+        self.assertArrayEqual(collapsed_coord.bounds, np.array([[1,  7],
+                                                                [2,  8],
+                                                                [4, 10],
+                                                                [5, 11]]))
 
 
 class Test_is_compatible(tests.IrisTest):
