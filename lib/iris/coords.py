@@ -1146,7 +1146,8 @@ class Coord(six.with_metaclass(ABCMeta, CFVariableMixin)):
 
         Replaces the points & bounds with a simple bounded region.
         """
-        # Ensure dims_to_collapse is a tuple to be able to pass through to numpy
+        # Ensure dims_to_collapse is a tuple to be able to pass
+        # through to numpy
         if isinstance(dims_to_collapse, (int, np.integer)):
             dims_to_collapse = (dims_to_collapse, )
         if isinstance(dims_to_collapse, list):
