@@ -313,27 +313,18 @@ class TestMissingData(tests.IrisTest):
 class TestAuxCoordCollapse(tests.IrisTest):
 
     def setUp(self):
-        from iris.analysis.cartography import area_weights
         self.cube_with_aux_coord = tests.stock.simple_4d_with_hybrid_height()
 
         # Guess bounds to get the weights
         self.cube_with_aux_coord.coord('grid_latitude').guess_bounds()
         self.cube_with_aux_coord.coord('grid_longitude').guess_bounds()
 
-        self.weights = area_weights(self.cube_with_aux_coord, normalize=False)
-        self.normalized_weights = area_weights(self.cube_with_aux_coord, normalize=True)
-
-        self.original_alt = self.cube_with_aux_coord.coord('altitude')
-        # [[100, 101, 102, 103, 104, 105],
-        #  [106, 107, 108, 109, 110, 111],
-        #  [112, 113, 114, 115, 116, 117],
-        #  [118, 119, 120, 121, 122, 123],
-        #  [124, 125, 126, 127, 128, 129]]
-
     def test_max(self):
-        cube = self.cube_with_aux_coord.collapsed('grid_latitude', iris.analysis.MAX)
+        cube = self.cube_with_aux_coord.collapsed('grid_latitude',
+                                                  iris.analysis.MAX)
         np.testing.assert_array_equal(cube.coord('surface_altitude').points,
-                                      np.array([112, 113, 114, 115, 116, 117]))
+                                      np.array([112, 113, 114,
+                                                115, 116, 117]))
 
         np.testing.assert_array_equal(cube.coord('surface_altitude').bounds,
                                       np.array([[100, 124],
@@ -344,7 +335,8 @@ class TestAuxCoordCollapse(tests.IrisTest):
                                                 [105, 129]]))
 
         # Check collapsing over the whole coord still works
-        cube = self.cube_with_aux_coord.collapsed('altitude', iris.analysis.MAX)
+        cube = self.cube_with_aux_coord.collapsed('altitude',
+                                                  iris.analysis.MAX)
 
         np.testing.assert_array_equal(cube.coord('surface_altitude').points,
                                       np.array([114]))
@@ -352,7 +344,8 @@ class TestAuxCoordCollapse(tests.IrisTest):
         np.testing.assert_array_equal(cube.coord('surface_altitude').bounds,
                                       np.array([[100, 129]]))
 
-        cube = self.cube_with_aux_coord.collapsed('grid_longitude', iris.analysis.MAX)
+        cube = self.cube_with_aux_coord.collapsed('grid_longitude',
+                                                  iris.analysis.MAX)
 
         np.testing.assert_array_equal(cube.coord('surface_altitude').points,
                                       np.array([102, 108, 114, 120, 126]))
