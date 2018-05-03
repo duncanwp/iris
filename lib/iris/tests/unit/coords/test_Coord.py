@@ -31,6 +31,7 @@ import iris
 from iris.coords import DimCoord, AuxCoord, Coord
 from iris.tests import mock
 from iris.exceptions import UnitConversionError
+from iris.tests.unit.coords import CoordTestMixin
 
 
 Pair = collections.namedtuple('Pair', 'points bounds')
@@ -232,7 +233,7 @@ class Test_cell(tests.IrisTest):
                                      mock.sentinel.upper))])
 
 
-class Test_collapsed(tests.IrisTest):
+class Test_collapsed(tests.IrisTest, CoordTestMixin):
 
     def test_serialize(self):
         # Collapse a string AuxCoord, causing it to be serialised.
@@ -299,6 +300,49 @@ class Test_collapsed(tests.IrisTest):
                                                                 [2,  8],
                                                                 [4, 10],
                                                                 [5, 11]]))
+
+    def test_lazy_nd_points(self):
+        import dask.array as da
+        self.setupTestArrays((3, 4))
+        coord = AuxCoord(self.pts_lazy)
+
+        collapsed_coord = coord.collapsed()
+
+        self.assertTrue(collapsed_coord.has_lazy_points())
+        self.assertFalse(collapsed_coord.has_lazy_bounds())
+
+        self.assertArrayEqual(collapsed_coord.points, da.array([55]))
+        self.assertArrayEqual(collapsed_coord.bounds, da.array([[0, 110]]))
+
+    def test_lazy_nd_bounds(self):
+        import dask.array as da
+
+        self.setupTestArrays((3, 4))
+        coord = AuxCoord(self.pts_real, bounds=self.bds_lazy)
+
+        collapsed_coord = coord.collapsed()
+
+        # Note that the new points get recalculated from the lazy bounds
+        #  and so end up as lazy
+        self.assertTrue(collapsed_coord.has_lazy_points())
+        self.assertTrue(collapsed_coord.has_lazy_bounds())
+
+        self.assertArrayEqual(collapsed_coord.points, np.array([55]))
+        self.assertArrayEqual(collapsed_coord.bounds, da.array([[-2, 112]]))
+
+    def test_lazy_nd_points_and_bounds(self):
+        import dask.array as da
+
+        self.setupTestArrays((3, 4))
+        coord = AuxCoord(self.pts_lazy, bounds=self.bds_lazy)
+
+        collapsed_coord = coord.collapsed()
+
+        self.assertTrue(collapsed_coord.has_lazy_points())
+        self.assertTrue(collapsed_coord.has_lazy_bounds())
+
+        self.assertArrayEqual(collapsed_coord.points, da.array([55]))
+        self.assertArrayEqual(collapsed_coord.bounds, da.array([[-2, 112]]))
 
 
 class Test_is_compatible(tests.IrisTest):

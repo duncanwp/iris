@@ -357,6 +357,7 @@ class TestAuxCoordCollapse(tests.IrisTest):
                                                 [118, 123],
                                                 [124, 129]]))
 
+
 class TestAggregator_mdtol_keyword(tests.IrisTest):
     def setUp(self):
         data = ma.array([[1, 2], [4, 5]], dtype=np.float32,
