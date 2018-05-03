@@ -1213,8 +1213,7 @@ class Coord(six.with_metaclass(ABCMeta, CFVariableMixin)):
 
             # Determine the right array method for stacking
             stack_method = da.stack if self.has_bounds() \
-                                       and is_lazy_data(self.core_bounds()) \
-                else np.stack
+                and is_lazy_data(self.core_bounds()) else np.stack
 
             item = stack_method(self.core_bounds()) if self.has_bounds() \
                 else self.core_points()
