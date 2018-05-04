@@ -1173,6 +1173,7 @@ class Coord(six.with_metaclass(ABCMeta, CFVariableMixin)):
         Replaces the points & bounds with a simple bounded region.
         """
         import dask.array as da
+
         # Ensure dims_to_collapse is a tuple to be able to pass
         # through to numpy
         if isinstance(dims_to_collapse, (int, np.integer)):
@@ -1211,16 +1212,16 @@ class Coord(six.with_metaclass(ABCMeta, CFVariableMixin)):
                     'Metadata may not be fully descriptive for {!r}.'
                 warnings.warn(msg.format(self.name()))
 
-            # Determine the right array method for stacking
-            stack_method = da.stack if self.has_bounds() \
-                and is_lazy_data(self.core_bounds()) else np.stack
+            # Determine the array library for stacking
+            al = da if self.has_bounds() and is_lazy_data(self.core_bounds()) \
+                else np
 
-            item = stack_method(self.core_bounds()) if self.has_bounds() \
+            item = al.concatenate(self.core_bounds()) if self.has_bounds() \
                 else self.core_points()
 
             # Calculate the bounds and points along the right dims
-            bounds = stack_method([item.min(axis=dims_to_collapse),
-                                   item.max(axis=dims_to_collapse)]).T
+            bounds = al.stack([item.min(axis=dims_to_collapse),
+                               item.max(axis=dims_to_collapse)]).T
             points = item.mean(axis=dims_to_collapse, dtype=self.dtype)
 
             # Create the new collapsed coordinate.
