@@ -301,19 +301,6 @@ class Test_collapsed(tests.IrisTest, CoordTestMixin):
                                                                 [4, 10],
                                                                 [5, 11]]))
 
-    def test_lazy_nd_points(self):
-        import dask.array as da
-        self.setupTestArrays((3, 4))
-        coord = AuxCoord(self.pts_lazy)
-
-        collapsed_coord = coord.collapsed()
-
-        self.assertTrue(collapsed_coord.has_lazy_points())
-        self.assertFalse(collapsed_coord.has_lazy_bounds())
-
-        self.assertArrayEqual(collapsed_coord.points, da.array([55]))
-        self.assertArrayEqual(collapsed_coord.bounds, da.array([[0, 110]]))
-
     def test_lazy_nd_bounds(self):
         import dask.array as da
 
